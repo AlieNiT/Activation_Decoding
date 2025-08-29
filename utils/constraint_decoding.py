@@ -86,8 +86,12 @@ class ConstraintDecoding():
         #     low_cpu_mem_usage=True, **kwargs)
         # tokenizer = AutoTokenizer.from_pretrained(model_name if not 'vicuna' in model_name else 'huggyllama/llama-7b',cache_dir='auto')
         # pdb.set_trace()
-        model = AutoModelForCausalLM.from_pretrained(model_name,
-            low_cpu_mem_usage=True,device_map="auto",torch_dtype=torch.float16)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            low_cpu_mem_usage=True,
+            device_map="auto",
+            offload_folder="offload_dir",torch_dtype=torch.float16
+        )
         
         if self.device == "cuda" and self.num_gpus == 1:
             model.cuda()
