@@ -8,7 +8,7 @@ dataset='hotpotqa'
 data_path=../scripts/data/hpqa
 # For "natural_questions", path is "../scripts/data/nq". For "triviaqa", path is "../scripts/data/trqa". 
 
-model=daryl149/llama-2-13b-chat-hf
+model=daryl149/llama-2-7b-chat-hf
 # model could also be "daryl149/llama-2-13b-chat-hf" or "daryl149/llama-2-70b-chat-hf" 
 model_name="${model#*/}"
 printf "Model name: $model_name\n"
