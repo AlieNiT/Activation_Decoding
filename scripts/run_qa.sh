@@ -18,7 +18,7 @@ printf "Model name: $model_name\n"
 decoding_mode="baseline"
 # decoding_mode could be "baseline", "dola", "activation","activation_dola"
 output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}.json"
-python ../eval_knowledge_qa.py --model-name $model --dataset_name $dataset --decoding_mode $decoding_mode  --output-path $output_path --num-gpus 1 --do-rating 
+python ../eval_knowledge_qa.py --model-name $model --dataset_name $dataset --decoding_mode $decoding_mode  --output-path $output_path --num-gpus 1 --do-rating --device cpu
 
 ##### DOLA #####
 early_exit_layers="0,2,4,6,8,10,12,14,32"
