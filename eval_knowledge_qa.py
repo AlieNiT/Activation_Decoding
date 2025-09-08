@@ -179,11 +179,12 @@ if __name__ == "__main__":
     parser.add_argument("--temperature", type=float, default=0.9)
     parser.add_argument("--repetition_penalty", type=float, default=None)
     parser.add_argument("--relative_top", type=float, default=0.1)
+    parser.add_argument("--with_proper", type=bool, default=False)
 
     # following four parameters are added
     parser.add_argument("--dataset_name", type=str, choices=["triviaqa", "natural_questions", "hotpotqa"], default="triviaqa")
     parser.add_argument("--data_path", type=str, default="../scripts/data/nq")
-    parser.add_argument("--decoding_mode", type=str, choices=["activation", "dola", "activation_dola", "baseline", 'iti'], default="activation")
+    parser.add_argument("--decoding_mode", type=str, choices=["activation", "activation_proper", "dola", "activation_dola", "baseline", 'iti'], default="activation")
     parser.add_argument("--alpha", type=float, default=0.1)
     parser.add_argument("--info_layer", type=int, default=24)
     parser.add_argument("--decoding_strategy", type=str)
@@ -223,6 +224,16 @@ if __name__ == "__main__":
     if args.decoding_mode == 'activation':
         mode="activation"
         print(f"MODE: Activation decoding with mature layer: {early_exit_layers[-1]} and premature layers: {early_exit_layers[:-1]}")
+        
+        mature_layer = early_exit_layers[-1]
+        premature_layer = None
+        candidate_premature_layers = early_exit_layers[:-1]
+        # what is premature layer dist? distance?
+        premature_layer_dist = {l:0 for l in candidate_premature_layers}
+
+    elif args.decoding_mode == 'activation_proper':
+        mode="activation_proper"
+        print(f"MODE: Activation proper decoding with mature layer: {early_exit_layers[-1]} and premature layers: {early_exit_layers[:-1]}")
         
         mature_layer = early_exit_layers[-1]
         premature_layer = None
@@ -284,14 +295,14 @@ if __name__ == "__main__":
     
     llm = ConstraintDecoding(model_name, device, num_gpus, args.max_gpu_memory)
     stop_word_list = ["Q:"]
-    if args.decoding_mode in ["activation", "dola", "activation_dola", "baseline"]:
+    if args.decoding_mode in ["activation", "activation_proper", "dola", "activation_dola", "baseline"]:
         llm.set_stop_words(stop_word_list)
         
     
  
     generate_kwargs = dict(max_new_tokens=args.max_new_tokens, top_p=args.top_p, 
                             top_k=args.top_k, temperature=args.temperature, repetition_penalty=args.repetition_penalty, mode=mode, mature_layer=mature_layer, premature_layer=premature_layer, candidate_premature_layers=candidate_premature_layers,
-                            alpha=args.alpha,info_layer=args.info_layer,decoding_strategy=args.decoding_strategy)
+                            alpha=args.alpha,info_layer=args.info_layer,decoding_strategy=args.decoding_strategy, with_proper=args.with_proper)
     
         
     result_dict = {'qid_list':[], 'answers': {}, 'model_completion': {}, 'questions': {}, 'logit_scores': {}}
@@ -359,9 +370,9 @@ if __name__ == "__main__":
         if 'Q:' in model_completion:
             model_completion = model_completion.split('Q:')[0].strip()
         model_completion = model_completion.strip()
-
+        print(model_completion)
         # TODO: what is this for?
-        if mode in ["dola", "activation"]:
+        if mode in ["dola", "activation", "activation_proper"]:
             for k, v in c_dist.items():
                 premature_layer_dist[k] += v
                         
@@ -374,9 +385,9 @@ if __name__ == "__main__":
         result_dict['questions'][i] = question
         result_dict['logit_scores'][i] = logit_scores
         
-        if args.debug:
-            if i > 10:
-                break     
+        # if args.debug:
+        #     if i > 10:
+        #         break     
         
         
         # here I note the next 'print' lines

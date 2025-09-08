@@ -28,23 +28,23 @@ echo "Early exit layers: $early_exit_layers"
 echo "Info layer: $info_layer"
 
 ## BASELINE
-decoding_mode="baseline"
-output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}.json"
-python ../eval_knowledge_qa.py \
-    --model-name $model --dataset_name $dataset \
-    --decoding_mode $decoding_mode \
-    --output-path $output_path \
-    --num-gpus 1 --do-rating --debug $debug
+# decoding_mode="baseline"
+# output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}.json"
+# python ../eval_knowledge_qa.py \
+#     --model-name $model --dataset_name $dataset \
+#     --decoding_mode $decoding_mode \
+#     --output-path $output_path \
+#     --num-gpus 1 --do-rating --debug $debug
 
 ## DOLA
-decoding_mode="dola"
-output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}.json"
-python ../eval_knowledge_qa.py \
-    --model-name $model --dataset_name $dataset \
-    --decoding_mode $decoding_mode \
-    --early_exit_layers $early_exit_layers \
-    --output-path $output_path \
-    --num-gpus 1 --do-rating --debug $debug
+# decoding_mode="dola"
+# output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}.json"
+# python ../eval_knowledge_qa.py \
+#     --model-name $model --dataset_name $dataset \
+#     --decoding_mode $decoding_mode \
+#     --early_exit_layers $early_exit_layers \
+#     --output-path $output_path \
+#     --num-gpus 1 --do-rating --debug $debug
 
 ## ACTIVATION
 decoding_mode="activation"
@@ -58,18 +58,31 @@ python ../eval_knowledge_qa.py \
     --output-path $output_path \
     --num-gpus 1 --do-rating --data_path $data_path --debug $debug
 
-## ACTIVATION_DOLA
-decoding_mode="activation_dola"
+## ACTIVATION_PROPER
+decoding_mode="activation"
 alpha="0.8"
-decoding_strategy="entropy"
-output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}_${alpha}_${info_layer}.json"
+decoding_strategy="entropy"  # or "single_entropy"
+output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}_proper_${alpha}_${info_layer}.json"
 python ../eval_knowledge_qa.py \
     --model-name $model --dataset_name $dataset \
     --decoding_mode $decoding_mode \
-    --early_exit_layers $early_exit_layers \
     --alpha $alpha --info_layer $info_layer --decoding_strategy $decoding_strategy \
     --output-path $output_path \
-    --num-gpus 1 --do-rating --data_path $data_path --debug $debug
+    --num-gpus 1 --do-rating --data_path $data_path --debug $debug \
+    --with_proper True
+
+## ACTIVATION_DOLA
+# decoding_mode="activation_dola"
+# alpha="0.8"
+# decoding_strategy="entropy"
+# output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}_${alpha}_${info_layer}.json"
+# python ../eval_knowledge_qa.py \
+#     --model-name $model --dataset_name $dataset \
+#     --decoding_mode $decoding_mode \
+#     --early_exit_layers $early_exit_layers \
+#     --alpha $alpha --info_layer $info_layer --decoding_strategy $decoding_strategy \
+#     --output-path $output_path \
+#     --num-gpus 1 --do-rating --data_path $data_path --debug $debug
 
 
 ## ACTIVATION_PROPERNOUN

@@ -1174,6 +1174,7 @@ class GenerationMixin:
         # dola
         dola_decoding: Optional[bool] = None,
         activation_decoding: Optional[bool] = None,
+        entropy_mask: Optional[torch.Tensor] = None,
         activation_dola_decoding: Optional[bool] = None,
         mature_layer: Optional[int] = None,
         base_layer: Optional[int] = None,
@@ -1586,6 +1587,7 @@ class GenerationMixin:
             # 11. run greedy search
             return self.activation_greedy_decode(
                 input_ids,
+                entropy_mask=entropy_mask,
                 logits_processor=logits_processor,
                 stopping_criteria=stopping_criteria,
                 pad_token_id=generation_config.pad_token_id,
@@ -3267,6 +3269,7 @@ class GenerationMixin:
     def activation_greedy_decode(
         self,
         input_ids: torch.LongTensor,
+        entropy_mask: torch.BoolTensor,
         mature_layer: int,
         base_layer: Optional[int] = None,
         candidate_premature_layers: Optional[List[int]] = None,
@@ -3525,6 +3528,9 @@ class GenerationMixin:
                 #TODO: for all strategies except for 'entropy', we need to use the info_layer scores
                 if len(before) == 0: # the token is the first generated token
                     info_layer_score=dict_outputs[info_layer][-1, :, :] # [num_token_in_question, len_token_lib] -> e.g. [62, 32000]
+                    #ALIENIT HERE ONLY KEEP PROPER NOUNS
+                    if entropy_mask is not None:
+                        info_layer_score = info_layer_score[entropy_mask]
                     before = (info_layer_score,)      
                                   
                     # compute entropy of the info layer
