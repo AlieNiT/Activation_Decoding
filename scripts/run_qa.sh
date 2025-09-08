@@ -11,7 +11,7 @@ dataset="hotpotqa"
 data_path="../scripts/data/hpqa"  # nq → ../scripts/data/nq, trqa → ../scripts/data/trqa
 model="daryl149/llama-2-7b-chat-hf"
 model_name="${model#*/}"
-debug=True
+# debug=False
 
 # model → (early_exit_layers, info_layer)
 declare -A model_params
@@ -46,18 +46,6 @@ echo "Info layer: $info_layer"
 #     --output-path $output_path \
 #     --num-gpus 1 --do-rating --debug $debug
 
-## ACTIVATION
-decoding_mode="activation"
-alpha="0.8"
-decoding_strategy="entropy"  # or "single_entropy"
-output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}_${alpha}_${info_layer}.json"
-python ../eval_knowledge_qa.py \
-    --model-name $model --dataset_name $dataset \
-    --decoding_mode $decoding_mode \
-    --alpha $alpha --info_layer $info_layer --decoding_strategy $decoding_strategy \
-    --output-path $output_path \
-    --num-gpus 1 --do-rating --data_path $data_path --debug $debug
-
 ## ACTIVATION_PROPER
 decoding_mode="activation"
 alpha="0.8"
@@ -68,8 +56,21 @@ python ../eval_knowledge_qa.py \
     --decoding_mode $decoding_mode \
     --alpha $alpha --info_layer $info_layer --decoding_strategy $decoding_strategy \
     --output-path $output_path \
-    --num-gpus 1 --do-rating --data_path $data_path --debug $debug \
+    --num-gpus 1 --do-rating --data_path $data_path \
     --with_proper True
+
+## ACTIVATION
+decoding_mode="activation"
+alpha="0.8"
+decoding_strategy="entropy"  # or "single_entropy"
+output_path="../res/res_hpqa/${model_name}/${model_name}_${decoding_mode}_${alpha}_${info_layer}.json"
+python ../eval_knowledge_qa.py \
+    --model-name $model --dataset_name $dataset \
+    --decoding_mode $decoding_mode \
+    --alpha $alpha --info_layer $info_layer --decoding_strategy $decoding_strategy \
+    --output-path $output_path \
+    --num-gpus 1 --do-rating --data_path $data_path
+
 
 ## ACTIVATION_DOLA
 # decoding_mode="activation_dola"

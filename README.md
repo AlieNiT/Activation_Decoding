@@ -98,6 +98,14 @@ bash run_tqa.sh # refer to this script for more details
 
 Please cite our paper if it's helpful to your work!
 
+## Evaluation
+
+|          | Exact Match | F1 Score |
+|----------|----------|----------|
+| Activation Decoding    | 21.04     | 21.90     |
+| Activation Decoding on Proper Nouns    | 20.61     | 21.56     |
+
+
 ```bibtex
 @inproceedings{
 chen2024incontext,
