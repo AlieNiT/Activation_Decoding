@@ -176,7 +176,7 @@ tags
 /vis/models
 /vis/results
 # /scripts
-/scripts
+# /scripts
 /scripts/auto
 /scripts/cachegpt3.config.json
 
