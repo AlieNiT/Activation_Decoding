@@ -3,8 +3,41 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaTokenizer
 from transformers.generation.stopping_criteria import StoppingCriteriaList, LLamaQaStoppingCriteria
 import numpy as np
-
 import pdb
+
+import nltk
+nltk.download('averaged_perceptron_tagger_eng')
+from nltk.tag import pos_tag
+import torch
+
+def _get_proper_noun_mask(sentence):
+    tagged_sent = pos_tag(sentence.split())
+    proper_noun_mask = []
+    for word, tag in tagged_sent:
+        proper_noun_mask += [tag == 'NNP'] * len(word)
+        proper_noun_mask.append(False)
+    proper_noun_mask = proper_noun_mask[:-1]
+    return proper_noun_mask
+
+def _majority_true(lst):
+    return sum(lst) > len(lst) / 2
+
+
+def get_entropy_mask(sentence, tokenizer):
+    proper_noun_mask = _get_proper_noun_mask(sentence)
+
+    ids = tokenizer(sentence, return_tensors="pt").input_ids
+
+
+    prev_length = 0
+    entropy_mask = [False]
+    for i in range(1, len(ids[0])):
+        decoded = tokenizer.decode(ids[0, 1:i + 1])
+        entropy_mask.append(_majority_true(proper_noun_mask[prev_length: len(decoded)]))
+        prev_length = len(decoded)
+    
+    return torch.tensor(entropy_mask)
+
 
 class ConstraintDecoding():
     def __init__(self, model_name, device, num_gpus, max_gpu_memory=27):
@@ -90,9 +123,7 @@ class ConstraintDecoding():
                 assert candidate_premature_layers is not None, "candidate_premature_layers must be specified"
                 entropy_mask = None
                 if with_proper:
-                    # TODO: make it logical
-                    entropy_mask = torch.zeros(input_ids.shape[-1], dtype=torch.bool)
-                    entropy_mask[:min(10, input_ids.shape[-1])] = True
+                    entropy_mask = get_entropy_mask(input_text, self.tokenizer)
                 outputs = self.model.generate(input_ids, max_length=max_len, num_return_sequences=1, output_hidden_states=True,
                                         output_scores=True, return_dict_in_generate=True, activation_decoding=True, entropy_mask=entropy_mask,
                                         top_p=top_p, top_k=top_k, temperature=temperature, stopping_criteria=self.stopping_criteria, relative_top=relative_top, 
